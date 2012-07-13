@@ -2,7 +2,10 @@ Licensing
 ================================================================================
 
 bork is licensed under one of the two following licenses. You may choose
-which of these licenses you wish to use it under:
+which of these licenses you wish to use it under. For further options, you may
+contact me to discuss your options, but I believe both of these licenses are the
+best-suited and would consider any decision to request another license
+ill-advised.
 
 
 MIT License
