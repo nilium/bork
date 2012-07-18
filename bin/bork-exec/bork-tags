@@ -1,4 +1,8 @@
 #!/bin/sh
 
-station=$(bork station)
-ls "$station/tags"
+station="$(bork station)"
+if [[ $? == 0 ]] ; then
+  ls "$station/tags"
+else
+  echo "No bork station found"
+fi
