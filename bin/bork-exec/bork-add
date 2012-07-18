@@ -47,7 +47,6 @@ fi
 
 declare -a file_inputs
 declare -a tag_inputs
-declare -a file_hashes
 
 # get arguments
 tag_count=0
@@ -88,5 +87,4 @@ for file_idx in `seq 0 $(($file_count - 1))` ; do
     add_tag_to_file "$tag" "$file_hash" "$station"
   done
 
-  file_hashes[$file_idx]=$file_hash
 done
