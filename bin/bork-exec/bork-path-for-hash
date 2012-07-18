@@ -1,0 +1,26 @@
+#!/bin/sh
+
+bork_where="$(bork where)"
+source "$bork_where/bork-absolute-path.sh"
+
+station="$(bork station)"
+
+file_hash="$1"
+
+if [[ ${#file_hash} -lt 4 ]] ; then
+  echo "bork-path-for-hash: hash is too short (length must be greater than 3)."
+  exit 1
+fi
+
+bucket=${file_hash:0:2}
+common=${file_hash:2:${#file_hash}}
+
+if [[ ! -d "$station/index/$bucket" ]] ; then
+  echo "bork-path-for-hash: No files found matching hash."
+  exit 1
+fi
+
+for hashed_file in `find "$station/index" -name "$common*.meta"` ; do
+  file_path="$(dirname "$station")/$(cat $hashed_file)"
+  bork path-to "$PWD" "$file_path"
+done
