@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'set'
+
+OP_REGEX = /^([&+\-])?(.+)$/
+
+station = %x(bork station).chomp
+unless $? == 0
+  puts "No bork station found."
+  exit 1
+end
+
+def files_for_tag station, tag
+  Dir.foreach("#{station}/tags/#{tag}").reject {
+    |entry|
+    entry.start_with? '.'
+  }.map {
+    |entry|
+    entry = "#{station}/index/#{entry[0..1]}/#{entry[2..-1]}"
+  }
+end
+
+# using ruby for set operations
+results = Set.new
+first_match = true
+
+ARGV.each {
+  |arg|
+
+  op_match = OP_REGEX.match(arg)
+  op = op_match[1] || (first_match ? '+' : '&')
+  tag = op_match[2]
+
+  first_match = false
+
+  files = files_for_tag(station, tag)
+
+  case op
+  when '&' then results &= files
+  when '+' then results |= files
+  when '-' then results -= files
+  else
+    puts "bork-find: Invalid tag operator #{op}"
+    exit 1
+  end
+}
+
+results.to_a.sort.each {
+  |item|
+  file = `cat "#{item}.meta"`
+  puts file
+}
