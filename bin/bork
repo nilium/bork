@@ -14,8 +14,8 @@ HELP_TEXT = <<EOS
 
 Available bork commands:
   init    - Create a new bork index in the current directory.
-  add     - Adds one or more files with at least one tag to the index.
-  rm      - Removes a tag from a file or a file from the index.
+  add     - Adds one or more files with one or more tags to the station.
+  rm      - Removes a tag from a file or a file from the station.
   update  - Updates all links to files and tags.
   find    - Finds all files with the given tag and places them in the current
             working directory.
