@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby
+
+BORK_VERSION = '0.0.0'
+
+BORK_VERSION_TEXT = "bork v#{BORK_VERSION}"
+
+DEFAULT_TEXT = <<EOS
+#{BORK_VERSION_TEXT}
+Use 'bork help' to see available commands.
+EOS
+
+HELP_TEXT = <<EOS
+#{BORK_VERSION_TEXT}
+
+Available bork commands:
+  init    - Create a new bork index in the current directory.
+  add     - Adds one or more files with at least one tag to the index.
+  rm      - Removes a tag from a file or a file from the index.
+  update  - Updates all links to files and tags.
+  find    - Finds all files with the given tag and places them in the current
+            working directory.
+  tags    - See all tags in the index.
+  version - Get the current version of bork.
+  help    - Get this text or provide a command to get additional information,
+            such as 'bork help init'.
+EOS
+
+def error_cmd cmd
+  puts "bork: #{cmd} is not a bork command."
+  exit 1
+end
+
+def no_cmd
+  puts DEFAULT_TEXT
+  exit 0
+end
+
+def help_cmd
+  puts HELP_TEXT
+  exit 0
+end
+
+def version_cmd
+  puts BORK_VERSION
+  exit 0
+end
+
+def exec_bork_cmd cmd, args
+  case cmd
+  when 'version' then version_cmd
+  when 'help' then help_cmd
+  end
+
+  dir = File.dirname __FILE__
+  exec_path = "#{dir}/bork-exec/bork-#{cmd}"
+
+  error_cmd cmd unless File.exists? exec_path
+
+  unless args.nil?
+    exec exec_path, *args
+  else
+    exec exec_path
+  end
+end
+
+def bork_main
+  no_cmd if ARGV.length == 0
+
+  cmd = ARGV[0]
+  args = ARGV.length > 1 ? ARGV[1..-1] : nil
+  exec_bork_cmd cmd, args
+end
+
+bork_main
