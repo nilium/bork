@@ -1,13 +1,10 @@
 #!/bin/sh
 
-# index_for_hash file_hash [station_path]
-function index_for_hash {
-  hash_path="index/${1:0:2}/${1:2:${#1}}"
-  if [[ -n $2 ]] ; then
-    hash_path="$2/$hash_path"
-  fi
-  echo "$hash_path"
-}
+bork_where="$(bork where)"
+PATH="${PATH}:${bork_where}"
+
+source "$bork_where/bork-file-index.sh"
+source "$bork_where/bork-hash.sh"
 
 # add_index_file file file_hash station_path
 function add_index_file {
@@ -40,10 +37,6 @@ function add_tag_to_file {
   touch "$tag_dir/$2"
 }
 
-function hash_file {
-  hash_result=`openssl dgst -sha1 "$1"`
-  echo ${hash_result#*\= }
-}
 # get station
 station="$(bork station)"
 
