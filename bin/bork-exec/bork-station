@@ -17,3 +17,10 @@ function find_station {
 }
 
 find_station
+r=$?
+
+if [[ $r != 0 ]] ; then
+  echo "No bork station found."
+fi
+
+exit $r
