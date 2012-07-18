@@ -1,0 +1,11 @@
+* Implement bork-update. Checks for changes to files, updates their position
+  in the index if necessary.
+
+* Implement bork-clear. Removes any grabbed files.
+
+* Implement bork-find. Locates all files based on a tag query. Query should use
+  simple set operations (unions, intersections, etc.). No primes.
+
+* Implement bork-rm. Removes tags. Files without tags are removed from the
+  bork station. bork-update should handle the removal (called after X number
+  of operations, maybe?  Possibly treat it like an extremely naive git-gc).
