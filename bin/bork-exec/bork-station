@@ -1,0 +1,19 @@
+#!/bin/sh
+
+function find_station {
+  cwd=`pwd`
+  while [[ "$cwd" != "/" ]] ; do
+    station_path="$cwd/.bork"
+
+    if [[ -d "$station_path" ]] ; then
+      echo "$station_path"
+      return 0
+    fi
+
+    cwd=`dirname "$cwd"`
+  done
+
+  return 1
+}
+
+find_station
