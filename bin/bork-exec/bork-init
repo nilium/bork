@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [[ -a '.bork' ]] ; then
+  echo "A bork station already exists in this directory."
+  exit 1
+fi
+
+mkdir .bork
+cd .bork
+
+mkdir tags
+mkdir index
+
+# active files
+touch active
