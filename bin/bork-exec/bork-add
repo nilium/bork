@@ -20,7 +20,7 @@ function add_index_file {
     bucket_path="$(dirname "$index_path")"
 
     mkdir -p "$bucket_path"
-    basename "$file" > "$index_path.meta"
+    bork path-to "$(dirname "$station")" "$file" > "$index_path.meta"
     ln "$file" "$index_path"
   fi
 }
