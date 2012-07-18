@@ -82,7 +82,8 @@ elif [[ $tag_count -lt 1 ]] ; then
 fi
 
 # add files to index
-for file_idx in `seq 0 $(($file_count - 1))` ; do
+file_idx=0
+while [[ $file_idx -lt $file_count ]] ; do
   file="${file_inputs[$file_idx]}"
   file_hash=$(hash_file "$file")
 
@@ -93,4 +94,5 @@ for file_idx in `seq 0 $(($file_count - 1))` ; do
     add_tag_to_file "$tag" "$file_hash" "$station"
   done
 
+  file_idx=$(($file_idx + 1))
 done
