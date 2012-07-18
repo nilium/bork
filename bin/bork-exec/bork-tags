@@ -1,0 +1,4 @@
+#!/bin/sh
+
+station=$(bork station)
+ls "$station/tags"
