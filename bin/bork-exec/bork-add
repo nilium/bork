@@ -85,14 +85,18 @@ fi
 file_idx=0
 while [[ $file_idx -lt $file_count ]] ; do
   file="${file_inputs[$file_idx]}"
-  file_hash=$(hash_file "$file")
 
-  add_index_file "$file" "$file_hash" "$station"
+  if [[ -f "$file" ]] ; then
+    file_hash=$(hash_file "$file")
 
-  for tag_idx in `seq 0 $(($tag_count - 1))` ; do
-    tag="${tag_inputs[$tag_idx]}"
-    add_tag_to_file "$tag" "$file_hash" "$station"
-  done
+    add_index_file "$file" "$file_hash" "$station"
+
+    for tag in ${tag_inputs[*]} ; do
+      add_tag_to_file "$tag" "$file_hash" "$station"
+    done
+  else
+    echo "Invalid file: $file"
+  fi
 
   file_idx=$(($file_idx + 1))
 done
