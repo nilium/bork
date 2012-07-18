@@ -94,6 +94,11 @@ while [[ $file_idx -lt $file_count ]] ; do
     for tag in ${tag_inputs[*]} ; do
       add_tag_to_file "$tag" "$file_hash" "$station"
     done
+  elif [[ -d "$file" ]] ; then
+    for rec_file in `find -X "$file" \! -iname '.*' \! -path '*/.*' \! -type d \! -type b \! -type p \! -type s \! -type c` ; do
+      file_inputs[$file_count]="$rec_file"
+      file_count=$(($file_count + 1))
+    done
   else
     echo "Invalid file: $file"
   fi
