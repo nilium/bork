@@ -99,6 +99,4 @@ module Bork
 
 end
 
-if __FILE__ == $0
-  Bork::JumpPad.new.run ARGV
-end
+Bork::JumpPad.new.run ARGV
