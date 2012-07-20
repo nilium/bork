@@ -67,7 +67,7 @@ module Bork
       }
 
       # get arguments
-      while cmd.start_with? '-' && ! argv.empty?
+      while cmd.start_with?('-') && ! argv.empty?
         case cmd
         when '--verbose', '-v' then options[:verbose] = true
         when '--station', '-s' then
