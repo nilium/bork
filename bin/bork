@@ -1,80 +1,88 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -w
 
-BORK_VERSION = '0.0.0'
+require 'bork'
+require 'bork/hub'
 
-BORK_VERSION_TEXT = "bork v#{BORK_VERSION}"
+module Bork
 
-DEFAULT_TEXT = <<EOS
-#{BORK_VERSION_TEXT}
-Use 'bork help' to see available commands.
-EOS
+  class JumpPad
+    @@BORK_VERSION_TEXT = "bork v#{Bork.version}"
 
-HELP_TEXT = <<EOS
-#{BORK_VERSION_TEXT}
+    def self.version_string
+      @@BORK_VERSION_TEXT
+    end
 
-Available bork commands:
-  init    - Create a new bork index in the current directory.
-  add     - Adds one or more files with one or more tags to the station.
-  rm      - Removes a tag from a file or a file from the station.
-  update  - Updates all links to files and tags.
-  find    - Finds all files with the given tag and places them in the current
-            working directory.
-  tags    - See all tags in the index.
-  version - Get the current version of bork.
-  help    - Get this text or provide a command to get additional information,
-            such as 'bork help init'.
-EOS
+    @@DEFAULT_TEXT = <<-EOS.gsub(/^ {6}/, '')
+      #{self.version_string}
+      Use 'bork help' to see available commands.
+    EOS
 
-def error_cmd cmd
-  puts "bork: #{cmd} is not a bork command."
-  exit 1
+    def default_text
+      @@DEFAULT_TEXT
+    end
+
+    def error_cmd cmd
+      puts "bork: #{cmd} is not a bork command."
+      exit 1
+    end
+
+    def no_cmd
+      puts default_text
+      exit 0
+    end
+
+    def exec_bork_cmd cmd, args, options = {}
+      # begin
+        Bork::Hub.default_hub.run cmd, args, options
+      # rescue
+        # error_cmd cmd
+      # end
+    end
+
+    def get_arguments argv
+      argv = Marshal.load(Marshal.dump(argv))
+
+      # station assignment is pointless but helps to illustrate it's an option
+      cmd = argv.shift
+      station = nil
+      options = {
+        :verbose => false,
+        :station => nil
+      }
+
+      # get arguments
+      while cmd.start_with? '-' && ! argv.empty?
+        case cmd
+        when '--verbose', '-v' then options[:verbose] = true
+        when '--station', '-s' then
+          station = Bork.find_station argv.shift
+          Bork.error_no_station if station.nil?
+          options[:station] = station
+        else
+          puts "bork: Invalid option: #{cmd}"
+          exit 1
+        end
+        cmd = argv.shift
+      end
+
+      cmd = cmd.to_sym
+
+      return cmd, argv, options
+    end
+
+    def run argv
+      no_cmd if argv.empty?
+
+      cmd, argv, options = get_arguments argv
+
+      Bork.load_commands
+      exec_bork_cmd cmd, argv, options
+    end
+
+  end # Main
+
 end
 
-def no_cmd
-  puts DEFAULT_TEXT
-  exit 0
+if __FILE__ == $0
+  Bork::JumpPad.new.run ARGV
 end
-
-def help_cmd
-  puts HELP_TEXT
-  exit 0
-end
-
-def version_cmd
-  puts BORK_VERSION
-  exit 0
-end
-
-def where_cmd
-  puts "#{File.dirname __FILE__}/bork-exec"
-  exit 0
-end
-
-def exec_bork_cmd cmd, args
-  case cmd
-  when 'version' then version_cmd
-  when 'help' then help_cmd
-  when 'where' then where_cmd
-  end
-
-  dir = File.dirname __FILE__
-  exec_path = "#{dir}/bork-exec/bork-#{cmd}"
-
-  error_cmd cmd unless File.exists? exec_path
-
-  unless args.nil?
-    exec exec_path, *args
-  else
-    exec exec_path
-  end
-end
-
-def bork_main
-  no_cmd if ARGV.length == 0
-
-  cmd = ARGV[0]
-  args = ARGV.length > 1 ? ARGV[1..-1] : nil
-  exec_bork_cmd cmd, args
-end
-
-bork_main
