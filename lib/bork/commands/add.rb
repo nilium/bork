@@ -29,14 +29,18 @@ module Bork
         :add
       end
 
-      def error_no_file file
-        puts "bork-add: No such file '#{file}'."
-        exit 1
-      end
-
       def run args, options = {}
-        files, tags = Bork.extract_file_tag_arguments args
-        station = Bork::Station.new options[:station]
+        files = nil
+        tags = nil
+        station = nil
+
+        begin
+          files, tags = Bork.extract_file_tag_arguments args
+          station = Bork::Station.new options[:station]
+        rescue RuntimeError => ex
+          puts "bork-add: #{ex}"
+          exit 1
+        end
 
         if tags.empty?
           puts "bork-add: No tags specified."
