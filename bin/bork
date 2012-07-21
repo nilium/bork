@@ -99,7 +99,13 @@ module Bork
       cmd, argv, options = get_arguments argv
 
       Bork.load_commands
-      exec_bork_cmd cmd, argv, options
+
+      begin
+        exec_bork_cmd cmd, argv, options
+      rescue RuntimeError => gen_ex
+        puts "bork: #{gen_ex}"
+        exit 1
+      end
     end
 
   end # Main
