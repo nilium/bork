@@ -31,7 +31,7 @@ module Bork
     end
 
     def help_string
-      <<-EOS.gsub(/^ {6}/, '')
+      <<-EOS.gsub(/^ {8}/, '')
       bork version
 
       Displays the current version of bork.

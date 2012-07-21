@@ -16,84 +16,123 @@
 # You should have received a copy of the GNU General Public License
 # along with bork.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'json'
+
 require 'bork/station'
 require 'bork/aux'
 require 'bork/hub'
 
 module Bork
 
-  class FindCommand
+  module Commands
 
-    def self.command
-      :find
-    end
+    class FindCommand
 
-    def run args, options = {}
-      begin
-        station = Bork::Station.new options[:station]
-
-        hashes = station.find_tagged_hashes args
-        root = station.root
-
-        hashes.map {
-          |hash|
-          station.file_for_hash hash
-        }.sort.each {
-          |file|
-          puts Bork.relative_path Dir.pwd, "#{root}/#{file}"
-        }
-      rescue RuntimeError => ex
-        puts "bork-find: #{ex}"
-        exit 1
+      def self.command
+        :find
       end
 
-    end
+      def run args, options = {}
+        begin
+          station = Bork::Station.new options[:station]
 
-    def help_string
-      <<-EOS.gsub(/^ {6}/, '')
-      bork find [tag] [<op><tag>] ...
+          verbose = options[:verbose]
+          noop = options[:noop]
 
-      Searches for files with the given tags and checks them out into the
-      working directory.
+          hashes = station.find_tagged_hashes args
+          root = station.station_home
 
-      Tags can be optionally be prefixed with one of three operators, &, the
-      intersection operator; +, the union operator; and -, the difference
-      operator. The first tag is assumed to always be a union and all other
-      tags default to the intersection operator.
+          rel_path = Bork.relative_path root, Dir.pwd
+          checked_out = []
+          checkout_file = "#{station}/checkout"
 
-      OPERATORS
-      ------------------------------------------------------------------------
-      &   The intersection operator. This is the default operator. It returns
-          the intersection of the current file set and the operator's tag.
-          For example:
+          if File.exists? checkout_file
+            puts "bork-find: Checkout file exists, clearing." if verbose
+            Bork::Hub.default_hub.run :clear, [], options
+          end
 
-            $ bork find foo bar
+          hashes.each {
+            |hash|
+            index_path = station.index_for_hash hash
+            filename = File.basename station.file_for_hash hash
+            link_path = "#{rel_path}/#{filename}"
 
-          will find all files tagged with both foo and bar. This is the same
-          as writing:
+            if ! File.exists? filename
+              checked_out << {
+                'path' => link_path,
+                'hash' => hash
+              }
 
-            $ bork find foo \&bar
+              puts "ln '#{index_path}' '#{filename}'" if verbose
+              File.link index_path, filename unless noop
+            else
+              puts "bork-find: File #{filename} already exists, will not overwrite."
+            end
+          }
 
-          Again, intersections are the default for all tags after the first.
-          (Note: the escaped ampersand is important to prevent the shell from
-          swallowing the ampersand and sending the process to the background.)
+          unless checked_out.empty?
+            File.open(checkout_file, 'w') {
+              |io|
+              io.write JSON[checked_out]
+            }
+          end
+        rescue RuntimeError => ex
+          puts "bork-find: #{ex}"
+          exit 1
+        end
 
-      +   The union operator. This simply creates a union of two tags' files.
+      end
 
-      -   The difference operator. This operator takes all previous tags'
-          files and remove's the difference tag's files from the set of found
-          files. So, if the found files are <1, 2, 3, 4> and the difference
-          tag's files are <1, 3>, the difference is <2, 4>, meaning you only
-          get files not shared with the difference tag.
+      def help_string
+        <<-EOS.gsub(/^ {8}/, '')
+        bork find [tag] [<op><tag>] ...
 
-      EOS
-    end
+        Searches for files with the given tags and checks them out into the
+        working directory.
 
-    Bork::Hub.default_hub.add_command_class self
-  end
+        Tags can be optionally be prefixed with one of three operators, &, the
+        intersection operator; +, the union operator; and -, the difference
+        operator. The first tag is assumed to always be a union and all other
+        tags default to the intersection operator.
 
-end
+        OPERATORS
+        ------------------------------------------------------------------------
+        &   The intersection operator. This is the default operator. It returns
+            the intersection of the current file set and the operator's tag.
+            For example:
 
-if __FILE__ == $0
-  Bork::FindCommand.new.run ARGV
-end
+              $ bork find foo bar
+
+            will find all files tagged with both foo and bar. This is the same
+            as writing:
+
+              $ bork find foo \&bar
+
+            Again, intersections are the default for all tags after the first.
+            (Note: the escaped ampersand is important to prevent the shell from
+            swallowing the ampersand and sending the process to the background.)
+
+        +   The union operator. This simply creates a union of two tags' files.
+
+        -   The difference operator. This operator takes all previous tags'
+            files and remove's the difference tag's files from the set of found
+            files. So, if the found files are <1, 2, 3, 4> and the difference
+            tag's files are <1, 3>, the difference is <2, 4>, meaning you only
+            get files not shared with the difference tag.
+
+        EOS
+      end
+
+      Bork::Hub.default_hub.add_command_class self
+
+      if __FILE__ == $0
+        require 'bork/commands/clear'
+
+        self.new.run ARGV
+      end
+
+    end # FindCommand
+
+  end # Commands
+
+end # Bork

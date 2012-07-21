@@ -21,76 +21,85 @@ require 'bork/station'
 
 module Bork
 
-  class HelpCommand
+  module Commands
 
-    def self.command
-      :help
-    end
+    class HelpCommand
 
-    def run args, options = {}
-      if args.empty?
-        puts help_string
-      else
-        hub = Bork::Hub.default_hub
-
-        args.each {
-          |cmd|
-          puts hub.help_string cmd.to_sym
-        }
+      def self.command
+        :help
       end
-      exit 0
-    end
 
-    def help_string
-      bork_dir = Bork::Station.station_directory
-      <<-EOS.gsub(/^ {6}/, '')
-      bork [options] [command] [arguments]
+      def run args, options = {}
+        if args.empty?
+          puts help_string
+        else
+          hub = Bork::Hub.default_hub
 
-      Options:
-        --verbose, -v
-            Produces verbose output for bork commands.
-        --station [path], -s [path]
-            Sets the search directory for a bork station or provides a path
-            directly to a bork station (the #{bork_dir} directory).
+          args.each {
+            |cmd|
+            puts hub.help_string cmd.to_sym
+          }
+        end
+        exit 0
+      end
 
-      Available bork commands:
-        init    - Create a new bork index in the current directory.
-        add     - Adds one or more files with one or more tags to the station.
-        rm      - Removes a tag from a file or a file from the station.
-        update  - Updates all links to files and tags. Run this if you modify
-                  a file currently in the station.
-        find    - Finds all files with the given tag and places them in the
-                  current working directory.
-        tags    - See all tags in the index.
-        version - Get the current version of bork.
-        help    - Get this text or provide a command to get additional
-                  information, such as 'bork help init'.
-        license - View the license text.
+      def help_string
+        bork_dir = Bork::Station.station_directory
+        <<-EOS.gsub(/^ {8}/, '')
+        bork [options] [command] [arguments]
 
-      bork is copyright (c) 2012 Noel R. Cower.
-      This program comes with ABSOLUTELY NO WARRANTY. This is free software,
-      and you are welcome to redistribute it under certain conditions. You
-      should have received a copy of the GNU General Public License along with
-      this program.  If not, see <http://www.gnu.org/licenses/>.
+        Options:
+          --station [path], -s [path]                                 [:station]
+              Sets the search directory for a bork station or provides a path
+              directly to a bork station (the #{bork_dir} directory).
 
-      EOS
-    end
+          --verbose, -v                                               [:verbose]
+              Produces verbose output for bork commands.
 
-    Bork::Hub.default_hub.add_command_class self
+          --dry, -D                                                      [:noop]
+              Tells bork to do a dry run of any operations. This will not modify
+              the station but will run through most steps for any command.
 
-  end
+        Available bork commands:
+          init    - Create a new bork index in the current directory.
+          add     - Adds one or more files with one or more tags to the station.
+          rm      - Removes a tag from a file or a file from the station.
+          update  - Updates all links to files and tags. Run this if you modify
+                    a file currently in the station.
+          find    - Finds all files with the given tag and places them in the
+                    current working directory.
+          tags    - See all tags in the index.
+          version - Get the current version of bork.
+          help    - Get this text or provide a command to get additional
+                    information, such as 'bork help init'.
+          license - View the license text.
 
-end
+        bork is copyright (c) 2012 Noel R. Cower.
+        This program comes with ABSOLUTELY NO WARRANTY. This is free software,
+        and you are welcome to redistribute it under certain conditions. You
+        should have received a copy of the GNU General Public License along with
+        this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if __FILE__ == $0
-  # have to load all other files here to get the required help strings
-  Dir.foreach(File.dirname(__FILE__)) {
-    |entry|
-    next if entry =~ /^\./ || File.extname(entry).downcase != '.rb'
-    # avoid horrible things.. well, too many horrible things
-    next if File.basename(__FILE__) == entry
-    require "bork/commands/#{entry}"
-  }
+        EOS
+      end
 
-  Bork::HelpCommand.new.run ARGV
-end
+      Bork::Hub.default_hub.add_command_class self
+
+      if __FILE__ == $0
+        # have to load all other files here to get the required help strings
+        Dir.foreach(File.dirname(__FILE__)) {
+          |entry|
+          next if entry =~ /^\./ || File.extname(entry).downcase != '.rb'
+          # avoid horrible things.. well, too many horrible things
+          next if File.basename(__FILE__) == entry
+          require "bork/commands/#{entry}"
+        }
+
+        self.new.run ARGV
+      end
+
+    end # HelpCommand
+
+  end # Commands
+
+end # Bork

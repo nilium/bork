@@ -20,35 +20,39 @@ require 'bork/hub'
 
 module Bork
 
-  class InitCommand
+  module Commands
 
-    def self.command
-      :init
-    end
+    class InitCommand
 
-    def run args, options = {}
-      stdir = Bork::Station.station_directory
-
-      if File.directory? stdir
-        puts "bork-init: Station already exists in this directory."
-        exit 1
+      def self.command
+        :init
       end
 
-      Dir.mkdir stdir
-      Dir.mkdir "#{stdir}/tags"
-      Dir.mkdir "#{stdir}/index"
-    end
+      def run args, options = {}
+        stdir = Bork::Station.station_directory
 
-    def help_string
-      ''
-    end
+        if File.directory? stdir
+          puts "bork-init: Station already exists in this directory."
+          exit 1
+        end
 
-    Bork::Hub.default_hub.add_command_class self
+        Dir.mkdir stdir
+        Dir.mkdir "#{stdir}/tags"
+        Dir.mkdir "#{stdir}/index"
+      end
 
-  end
+      def help_string
+        ''
+      end
 
-end
+      Bork::Hub.default_hub.add_command_class self
 
-if __FILE__ == $0
-  Bork::InitCommand.new.run ARGV
-end
+      if __FILE__ == $0
+        self.new.run ARGV
+      end
+
+    end # InitCommand
+
+  end # Commands
+
+end # Bork

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with bork.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'bork/station.rb'
+require 'bork/station'
 
 module Bork
 
@@ -39,12 +39,12 @@ module Bork
 
       Bork::Hub.default_hub.add_command_class self
 
-    end
+      if __FILE__ == $0
+        self.new.run ARGV
+      end
+
+    end # UpdateCommand
 
   end # Commands
 
-end
-
-if __FILE__ == $0
-  Bork::Commands::UpdateCommand.new.run ARGV
-end
+end # Bork

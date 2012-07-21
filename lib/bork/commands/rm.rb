@@ -16,24 +16,45 @@
 # You should have received a copy of the GNU General Public License
 # along with bork.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'bork/station'
+require 'bork/aux'
+require 'bork/hub'
 
 module Bork
 
   module Commands
 
-    class TagsCommand
+    class RmCommand
 
       def self.command
-        :tags
+        :rm
       end
 
       def run args, options = {}
         station = Bork::Station.new options[:station]
 
-        station.tag_names.each {
-          |name|
-          puts name
+        files = nil
+        tags = nil
+
+        begin
+          files, tags = Bork.extract_file_tag_arguments args
+        rescue Exception => ex
+          puts "bork-rm: #{ex}"
+          exit 1
+        end
+
+        if tags.empty?
+          puts "bork-rm: No tags specified."
+          exit 1
+        elsif files.empty?
+          puts "bork-rm: No files specified."
+          exit 1
+        end
+
+        files.each {
+          |file_path|
+          hash = Bork.hash_file file_path
+
+          station.remove_tags_from_hash! tags, hash, options
         }
       end
 
@@ -47,7 +68,7 @@ module Bork
         self.new.run ARGV
       end
 
-    end # TagsCommand
+    end # RmCommand
 
   end # Commands
 

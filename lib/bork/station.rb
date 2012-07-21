@@ -31,31 +31,42 @@ module Bork
     # If no search directory is provided, it looks for a Bork station in the
     # current directory.
     def initialize search_dir = nil
-      station_dir = dir = if search_dir
-        File.expand_path search_dir
-      else
-        search_dir = 'the current directory'
-        Dir.pwd
-      end
+      station_dir = nil
 
-      raise "No search directory provided." unless dir
-
-      stdir = Station.station_directory
-
-      unless File.basename(dir) == stdir && File.directory?(dir)
-        until File.directory?((station_dir = "#{dir}/#{stdir}"))
-          raise "No station found in or above #{search_dir}." if dir == '/'
-
-          dir = File.dirname dir
-        end
-      end
-
-      @station_path = station_dir
-      @indices_root = "#{station_dir}/index"
-      @tags_root = "#{station_dir}/tags"
       @tag_map = nil
       @file_hashes = nil
       @hash_path_map = nil
+
+      if search_dir.kind_of? Station
+        station_dir = search_dir.to_s
+
+        @tag_map = search_dir.tag_hash_map
+        @file_hashes = search_dir.file_hashes
+        @hash_path_map = search_dir.hash_path_map
+      else
+        station_dir = dir = if search_dir
+          File.expand_path search_dir
+        else
+          search_dir = 'the current directory'
+          Dir.pwd
+        end
+
+        raise "No search directory provided." unless dir
+
+        stdir = Station.station_directory
+
+        unless File.basename(dir) == stdir && File.directory?(dir)
+          until File.directory?((station_dir = "#{dir}/#{stdir}"))
+            raise "No station found in or above #{search_dir}." if dir == '/'
+
+            dir = File.dirname dir
+          end
+        end
+      end
+
+      @station_path = station_dir.freeze
+      @indices_root = "#{station_dir}/index".freeze
+      @tags_root = "#{station_dir}/tags".freeze
 
       if ! File.directory? @indices_root
         raise "Station index doesn't exist (or isn't a directory)."
@@ -73,11 +84,11 @@ module Bork
     end
 
     def indices_root
-      @indices_root ||= "#{self.station_path}/index"
+      @indices_root
     end
 
     def tags_root
-      @tags_root ||= "#{self.station_path}/tags"
+      @tags_root
     end
 
     def index_for_hash hash
@@ -319,8 +330,6 @@ module Bork
       verbose = options[:verbose]
       noop = options[:noop]
 
-      tags = tag_hash_map
-
       changed_hashes = {}
 
       puts "Updating indices." if verbose
@@ -331,19 +340,24 @@ module Bork
         file_index = index_for_hash hash
         cur_hash = Bork.hash_file file_index
 
-        unless hash == cur_hash
+        if hash != cur_hash
           ensure_bucket_for_hash! cur_hash, options
           cur_index = index_for_hash cur_hash
 
-          FileUtils.mv file_index,
-                       cur_index,
-                       :verbose => verbose, :noop => noop
-
-          FileUtils.mv "#{file_index}.meta",
-                       "#{cur_index}.meta",
-                       :verbose => verbose, :noop => noop
-
           changed_hashes[hash] = cur_hash
+
+          if ! File.exists? cur_index
+            FileUtils.mv file_index,
+                         cur_index,
+                         :verbose => verbose, :noop => noop
+
+            FileUtils.mv "#{file_index}.meta",
+                         "#{cur_index}.meta",
+                         :verbose => verbose, :noop => noop
+          else
+            FileUtils.rm file_index, :verbose => verbose, :noop => noop
+            FileUtils.rm "#{file_index}.meta", :verbose => verbose, :noop => noop
+          end
 
           old_bucket_path = File.dirname file_index
           if Dir.empty?(old_bucket_path) && ! noop
@@ -354,28 +368,32 @@ module Bork
       }
 
       tags_dir = self.tags_root
+      tags = tag_hash_map
 
       puts "Updating tags." if verbose
 
       tags.each {
-          |tag, hashes|
+        |tag, hashes|
 
-          puts "Updating '#{tag}' tag." if verbose
+        puts "Updating '#{tag}' tag." if verbose
 
-          tag_path = "#{tags_dir}/#{tag}"
+        tag_path = "#{tags_dir}/#{tag}"
 
-          changed_hashes.each {
-            |old_hash, new_hash|
+        changed_hashes.each {
+          |old_hash, new_hash|
 
-            if hashes.include? old_hash
-              FileUtils.mv "#{tag_path}/#{old_hash}",
-                           "#{tag_path}/#{new_hash}",
-                           :verbose => verbose, :noop => noop
-            end
-          }
+          if hashes.include? old_hash
+            FileUtils.mv "#{tag_path}/#{old_hash}",
+                         "#{tag_path}/#{new_hash}",
+                         :verbose => verbose, :noop => noop
+          end
+        }
 
-          Dir.unlink tag_path if hashes.empty? && ! noop
+        Dir.unlink tag_path if hashes.empty? && ! noop
       }
+
+      invalidate_tag_cache
+      invalidate_hash_cache
 
       if changed_hashes.empty?
         puts "bork: No indices updated."
@@ -386,8 +404,8 @@ module Bork
     end
 
     def remove_tags_from_hash! tags, hash, options = {}
-      noop = options[:noop] || true
-      verbose = options[:verbose] || true
+      noop = options[:noop]
+      verbose = options[:verbose]
 
       tags_path = self.tags_root
 
@@ -401,6 +419,8 @@ module Bork
           if File.exists? tag_file
             puts "Unlinking file '#{tag_file}'." if verbose
             File.unlink tag_file unless noop
+          elsif verbose
+            puts "#{hash} not tagged with '#{tag}'."
           end
 
           if Dir.empty? tag_dir
@@ -413,6 +433,13 @@ module Bork
 
     def to_s
       station_path
+    end
+
+
+    protected
+
+    def hash_path_map
+      @hash_path_map
     end
 
 
