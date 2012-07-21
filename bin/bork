@@ -76,6 +76,7 @@ module Bork
       while cmd.start_with?('-') && ! argv.empty?
         case cmd
         when '--verbose', '-v' then options[:verbose] = true
+        when '--dry', '-d' then options[:noop] = true
         when '--station', '-s' then
           station = Bork.find_station argv.shift
           Bork.error_no_station if station.nil?
