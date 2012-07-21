@@ -42,7 +42,7 @@ module Bork
       @commands[cmd]
     end
 
-    def run cmd, args, options = {}
+    def run cmd, args = [], options = {}
       class_for_command(cmd).new.run args, options
     end
 
