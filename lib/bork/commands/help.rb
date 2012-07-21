@@ -40,6 +40,7 @@ module Bork
             puts hub.help_string cmd.to_sym
           }
         end
+
         exit 0
       end
 
