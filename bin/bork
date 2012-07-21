@@ -31,6 +31,12 @@ module Bork
     @@DEFAULT_TEXT = <<-EOS.gsub(/^ {6}/, '')
       #{self.version_string}
       Use 'bork help' to see available commands.
+
+      bork is copyright (c) 2012 Noel R. Cower.
+      This program comes with ABSOLUTELY NO WARRANTY. This is free software,
+      and you are welcome to redistribute it under certain conditions. You
+      should have received a copy of the GNU General Public License along with
+      this program.  If not, see <http://www.gnu.org/licenses/>.
     EOS
 
     def default_text
