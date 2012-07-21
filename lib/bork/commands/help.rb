@@ -69,6 +69,8 @@ module Bork
                     a file currently in the station.
           find    - Finds all files with the given tag and places them in the
                     current working directory.
+          clear   - Removes checked out copies of files previously created by
+                    `bork find`.
           tags    - See all tags in the index.
           version - Get the current version of bork.
           help    - Get this text or provide a command to get additional
