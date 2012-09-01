@@ -9,7 +9,7 @@ so on. The only rule is that all files in bork must have tags. Tags or
 go home. Tags or pound sand, buddy. Tags, basically.
 
 bork uses the filesystem as its database, so there are a few 
-requirements for your filesystem must support:
+requirements your filesystem must support:
 
 * Hard links
 * Filenames of 40 characters minimum
