@@ -23,9 +23,6 @@ module Bork
     @@VERSION
   end
 
-  autoload :Hub, 'bork/hub'
-  autoload :Station, 'bork/station'
-
   def self.load_commands
     Dir.foreach("#{File.dirname __FILE__}/bork/commands") {
       |entry|
@@ -35,3 +32,6 @@ module Bork
   end
 
 end
+
+require 'bork/hub'
+require 'bork/station'
