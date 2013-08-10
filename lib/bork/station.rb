@@ -206,8 +206,8 @@ module Bork
       # using ruby for set operations
       first_match = true
 
-      tag_ops.inject(Set.new) {
-        |hash_set, arg|
+      results = tag_ops.each_with_object(Set.new) {
+        |arg, hash_set|
 
         op_match = @@OP_REGEX.match(arg)
         is_hash = !!op_match[2]
@@ -224,13 +224,18 @@ module Bork
           end
 
         case op
-        when '&' then hash_set & hashes
-        when '+' then hash_set | hashes
-        when '-' then hash_set - hashes
+        when '&', '@'
+          hash_set.select! { |hash|
+            hash_set.include?(hash) && hashes.include?(hash)
+          }
+        when '+' then hash_set.merge hashes
+        when '-' then hash_set.subtract hashes
         else
-          raise "Invalid tag operator #{op}"
+          raise "Invalid tag operator #{op} (#{arg}: #{op} #{is_hash} #{tag})"
         end
-      }.to_a
+      }
+
+      results.to_a
     end
 
     # Creates a bucket for the given hash and returns the path to the bucket.
