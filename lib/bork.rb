@@ -24,10 +24,10 @@ module Bork
   end
 
   def self.load_commands
-    Dir.foreach("#{File.dirname __FILE__}/bork/commands") {
+    Dir.foreach(File.expand_path("../bork/commands", __FILE__)) {
       |entry|
       next if entry.start_with? '.'
-      require "bork/commands/#{entry}"
+      require "bork/commands/#{entry.chomp '.rb'}"
     }
   end
 

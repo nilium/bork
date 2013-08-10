@@ -31,7 +31,7 @@ end
 
 module Bork
   # used by version
-  @@DOT_DIR_REGEX = /^\.{1,2}$/
+  @@DOT_DIR_REGEX = /^\./
 
   # used by extract_file_tag_arguments
   @@PRIVATE_FILE_REGEX = %r((^|/)\.(?!=$|/))
