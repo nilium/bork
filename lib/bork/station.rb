@@ -153,8 +153,8 @@ module Bork
     end
 
     def sort_hashes hashes
-      file_map = hashes.reduce(Hash.new) {
-        |map, file_hash|
+      file_map = hashes.each_with_object(Hash.new) {
+        |file_hash, map|
         index_path = index_for_hash file_hash
         map[file_hash] = index_path
         map
@@ -167,22 +167,21 @@ module Bork
     end
 
     def file_hashes
-      return @file_hashes.clone if @file_hashes
+      return @file_hashes if @file_hashes
 
       dot_regex = Bork.dot_dir_regex
       index_dir = self.indices_root
 
-      hashes = Dir.foreach(index_dir).inject([]) {
-        |container, bucket|
+      hashes = Dir.foreach(index_dir).each_with_object([]) {
+        |bucket, container|
+        next if bucket.start_with? '.'
         unless dot_regex === bucket
           tails = Dir.foreach("#{index_dir}/#{bucket}").reject {
             |h|
             dot_regex === h || h.end_with?('.meta')
           }
-          container += tails.map { |h| "#{bucket}#{h}" }
+          container.concat tails.map { |h| "#{bucket}#{h}" }
         end
-
-        container
       }
 
       (@file_hashes = hashes).clone

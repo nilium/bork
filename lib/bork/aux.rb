@@ -88,8 +88,8 @@ module Bork
       end
     }
 
-    files = files.reduce([]) {
-      |results, file_path|
+    files = files.each_with_object([]) {
+      |file_path, results|
 
       if File.exists? file_path
         if File.directory? file_path
