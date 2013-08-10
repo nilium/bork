@@ -195,10 +195,13 @@ module Bork
     # === Tag Operators:
     # [&] Intersection (default after the first tag). Results in an intersection
     #     of the results of previous operations and the right-hand tag.
+    # [@] Shell-friendly intersection synonym.
     # [+] Union (first tag is a union unless specified otherwise). Results in a
     #     union of the results of the previous ops and the right-hand tag.
     # [-] Difference. Gets the difference of the previous ops and the right-hand
     #     tag.
+    # [hash:]
+    #     Matches any hash that begins with the hash that follows this operator.
     def find_tagged_hashes tag_ops
       # using ruby for set operations
       first_match = true
