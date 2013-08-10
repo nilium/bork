@@ -19,7 +19,7 @@ require 'rake'
 
 Gem::Specification.new { |spec|
   spec.name        = 'bork'
-  spec.version     = '1.0.1'
+  spec.version     = '1.0.2'
   spec.date        = '2013-07-28'
   spec.summary     = 'bork file tagging utility'
   spec.description = <<-EOS.gsub(/^ {4}/, '')
