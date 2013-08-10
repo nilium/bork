@@ -21,7 +21,7 @@ module Bork
 
   class Station
 
-    @@OP_REGEX = /^([&+\-])?(.+)$/
+    @@OP_REGEX = /^([&@+\-])?(hash:)?(.+)$/
     @@BORK_DIRECTORY = '.bork'
 
     def self.station_directory
@@ -208,7 +208,7 @@ module Bork
 
         op_match = @@OP_REGEX.match(arg)
         op = op_match[1] || (first_match ? '+' : '&')
-        tag = op_match[2]
+        tag = op_match[3]
 
         first_match = false
 
