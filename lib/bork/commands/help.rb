@@ -67,6 +67,8 @@ module Bork
           rm      - Removes a tag from a file or a file from the station.
           update  - Updates all links to files and tags. Run this if you modify
                     a file currently in the station.
+          list    - Finds all files with the given tag and writes their hashes
+                    and paths to stdout.
           find    - Finds all files with the given tag and places them in the
                     current working directory.
           clear   - Removes checked out copies of files previously created by
