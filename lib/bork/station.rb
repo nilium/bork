@@ -207,12 +207,18 @@ module Bork
         |hash_set, arg|
 
         op_match = @@OP_REGEX.match(arg)
-        op = op_match[1] || (first_match ? '+' : '&')
+        is_hash = !!op_match[2]
         tag = op_match[3]
+        op = op_match[1] || (first_match || is_hash ? '+' : '@')
+        tag.downcase! if is_hash
 
         first_match = false
 
-        hashes = hashes_for_tag tag
+        hashes = if is_hash
+            file_hashes.select { |hash| hash.start_with?(tag) }
+          else
+            hashes_for_tag tag
+          end
 
         case op
         when '&' then hash_set & hashes
