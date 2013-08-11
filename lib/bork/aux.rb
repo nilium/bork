@@ -46,7 +46,9 @@ module Bork
 
   def self.hash_file filepath
     contents = File.open(filepath, 'r') { |io| io.read }
-    Digest::SHA1.hexdigest(contents).downcase!
+    hash = Digest::SHA1.hexdigest(contents)
+    hash.downcase!
+    hash
   end
 
   # Takes two absolute paths and produces a path to target relative to source
